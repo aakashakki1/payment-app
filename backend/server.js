@@ -1,35 +1,37 @@
 const express = require("express");
-const path = require("path");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const fetch = require("node-fetch");
+const mongoose = require("mongoose");
 
+const routes = require("./routes/initiatePayment");
+const pay = require("./services/pay");
 const app = express();
+
 const port = 3000;
 app.use(cors());
 
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-var options = {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization:
-      "Basic cHJpdmF0ZS03NzUxOkItcWEyLTAtNWYwMzFjZGQtMC0zMDJkMDIxNDQ5NmJlODQ3MzJhMDFmNjkwMjY4ZDNiOGViNzJlNWI4Y2NmOTRlMjIwMjE1MDA4NTkxMzExN2YyZTFhODUzMTUwNWVlOGNjZmM4ZTk4ZGYzY2YxNzQ4",
-    Simulator: "EXTERNAL",
-  },
-};
-
-app.post("/payment", async (req, response) => {
-  options["body"] = JSON.stringify(req.body);
-  let status = await fetch(
-    "https://api.test.paysafe.com/paymenthub/v1/payments",
-    options
+// connecting with database
+mongoose
+  .connect(
+    "mongodb+srv://ak:ROIIM123@cluster0.tht0j.mongodb.net/ROIIM?retryWrites=true&w=majority",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    }
   )
-    .then((res) => res.json())
-    .then((json) => json.status);
-  response.send(status);
+  .then(() => console.log("DATABASE CONNECTION SUCCESFULLY ESTABLISHED"))
+  .catch((err) => console.log(err));
+// initiating payment
+app.use("/initiatePayment", routes());
+
+// finsihing payment
+app.post("/", async (req, response) => {
+  let status = await pay(req.body);
+  return response.send(status);
 });
 
 app.listen(3000, () => {
