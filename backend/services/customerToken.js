@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+
 let getCustomerToken = async (merchantRefNum, customerId) => {
   console.log("customerId", customerId);
   let options, uri, result;

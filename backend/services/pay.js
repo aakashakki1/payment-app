@@ -3,7 +3,7 @@ const savedata = require("./saveUser");
 
 fetch = require("node-fetch");
 let pay = async (body) => {
-  let addUser, mybody, email, merchanCustomerId;
+  let addUser, mybody, email, merchantCustomerId;
   merchantCustomerId = "custom" + Math.floor(Math.random() * 1000000);
   addUser = false;
   var options = {
@@ -16,7 +16,6 @@ let pay = async (body) => {
     },
   };
   mybody = body;
-
   if (
     mybody.hasOwnProperty("customerOperation") &&
     mybody["customerOperation"] === "ADD"
@@ -35,10 +34,6 @@ let pay = async (body) => {
   email = mybody.email;
   delete mybody.email;
   options["body"] = JSON.stringify(mybody);
-  console.log(
-    "options $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ",
-    options
-  );
   let response = await fetch(
     "https://api.test.paysafe.com/paymenthub/v1/payments",
     options
@@ -49,10 +44,8 @@ let pay = async (body) => {
     });
   console.log("breakpoint => ", response);
   if (addUser && response.status === "COMPLETED") {
-    console.log("######################");
     savedata(email, options, merchantCustomerId);
   }
-  console.log("payment ", response.status, "customer id", response.id);
   return response.status;
 };
 module.exports = pay;
