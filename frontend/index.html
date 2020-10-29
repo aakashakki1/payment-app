@@ -26,7 +26,7 @@
                 </div>
                 <div class="form-group">
                   <label for="email">Email address</label>
-                  <input type="email" class="form-control" id="email" placeholder="Enter email" value="ak.123@gmail.com">
+                  <input type="email" class="form-control" id="email" placeholder="Enter email" value="CTC9@gmail.com">
                 </div>
                 <div class="form-group">
                   <label for="amount">Amount</label>
@@ -51,6 +51,14 @@
         <script>
             
         let refNum= "ROIIM"+Math.floor(Math.random()*1000000);
+        $(document).ready(function(){
+            $("button").click(function(event){
+                event.preventDefault();
+                getCustomerToken();
+            });
+        });
+
+        function getCustomerToken(){
         var options={    
                 "currency": "USD",
                 "amount": parseInt(document.getElementById("amount").value) * 100,
@@ -99,21 +107,36 @@
                         "accountId":"1679688456"
                     }
                 }
-            }
-        $(document).ready(function(){
-            $("button").click(function(event){
-                event.preventDefault();
-                checkout(options);
+            };
+            var body = {"email": document.getElementById("email").value,"merchantRefNum":refNum};
+            $.ajax({url: 'http://localhost:3000/initiatePayment',
+                headers: { 'Accept': 'application/json',
+                            'Content-Type': 'application/json' 
+                        },
+                type: 'post',
+                data: JSON.stringify(body),
+                // dataType: 'json',
+                contentType: 'application/json',
+                success: function (token) {
+                console.log("From Customer Token");
+                console.log(token);
+                if(token)
+                    options["singleUseCustomerToken"] = token["singleUseCustomerToken"];
+                    console.log("###################@@@@@@@@@@@@@@@@@@################",options);
+                    checkout(options);
+                    }
             });
-        });
-
+                
+        }
         function checkout(options) {
             paysafe.checkout.setup("cHVibGljLTc3NTE6Qi1xYTItMC01ZjAzMWNiZS0wLTMwMmQwMjE1MDA4OTBlZjI2MjI5NjU2M2FjY2QxY2I0YWFiNzkwMzIzZDJmZDU3MGQzMDIxNDUxMGJjZGFjZGFhNGYwM2Y1OTQ3N2VlZjEzZjJhZjVhZDEzZTMwNDQ=", 
             options,
             function(instance, error, result) {
+                console.log(result);
                 if (result && result.paymentHandleToken) {
                     console.log(result.paymentHandleToken);
                     console.log(result.customerOperation)
+                    console.log(options.singleUseCustomerToken);
                     console.log("Instance Object below");
                     console.log(instance);
                     var data={
@@ -124,6 +147,8 @@
                         "currencyCode":"USD",
                         "email":document.getElementById("email").value
                     }
+                        
+                    //console.log("token",data.singleUseCustomerToken);
                     // make AJAX call to Payments API
                     $.ajax({
                         url: 'http://localhost:3000',
@@ -148,7 +173,7 @@
             
                     });
                 } else {
-                    console.error(error);
+                    console.log(error);
                     // Handle the error
                     alert(error.detailedMessage);
 

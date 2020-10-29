@@ -27,10 +27,10 @@ mongoose
   .catch((err) => console.log(err));
 // initiating payment
 app.use("/initiatePayment", routes());
-
 // finsihing payment
 app.post("/", async (req, response) => {
   let status = await pay(req.body);
+  console.log("my status", status);
   return response.send(status);
 });
 

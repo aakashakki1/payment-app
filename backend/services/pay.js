@@ -1,7 +1,11 @@
-const { json } = require("express");
+const USER = require("../models/userSchema");
+const savedata = require("./saveUser");
 
 fetch = require("node-fetch");
 let pay = async (body) => {
+  let addUser, mybody, email, merchanCustomerId;
+  merchantCustomerId = "custom" + Math.floor(Math.random() * 1000000);
+  addUser = false;
   var options = {
     method: "POST",
     headers: {
@@ -11,18 +15,44 @@ let pay = async (body) => {
       Simulator: "EXTERNAL",
     },
   };
-  let mybody = body;
+  mybody = body;
+
+  if (
+    mybody.hasOwnProperty("customerOperation") &&
+    mybody["customerOperation"] === "ADD"
+  ) {
+    addUser = true;
+    delete mybody.customerOperation;
+    let user = await USER.findOne({ email: email })
+      .then((data) => data)
+      .catch((err) => null);
+    if (user) {
+      options["customerId"] = user.customerId;
+    } else {
+      options["merchanCustomerId"] = merchantCustomerId;
+    }
+  }
+  email = mybody.email;
   delete mybody.email;
   options["body"] = JSON.stringify(mybody);
-  let status = await fetch(
+  console.log(
+    "options $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ",
+    options
+  );
+  let response = await fetch(
     "https://api.test.paysafe.com/paymenthub/v1/payments",
     options
   )
     .then((res) => res.json())
     .then((json) => {
-      console.log(json);
-      return json.status;
+      return json;
     });
-  return status;
+  console.log("breakpoint => ", response);
+  if (addUser && response.status === "COMPLETED") {
+    console.log("######################");
+    savedata(email, options, merchantCustomerId);
+  }
+  console.log("payment ", response.status, "customer id", response.id);
+  return response.status;
 };
 module.exports = pay;
