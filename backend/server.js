@@ -7,12 +7,15 @@ const routes = require("./routes/initiatePayment");
 const pay = require("./services/pay");
 const app = express();
 
-const port = 3000;
 app.use(cors());
 
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
+let port = process.env.port;
+if (!port) {
+  port = 3000;
+}
 // connecting with database
 mongoose
   .connect(
@@ -32,7 +35,10 @@ app.post("/", async (req, response) => {
   let status = await pay(req.body);
   return response.send(status);
 });
-
-app.listen(3000, () => {
+let port = process.env.port;
+if (port === null) {
+  port = 3000;
+}
+app.listen(port, () => {
   console.log(`Express server listening on port ${port}!`);
 });
