@@ -109,7 +109,7 @@
                 }
             };
             var body = {"email": document.getElementById("email").value,"merchantRefNum":refNum};
-            $.ajax({url: 'http://localhost:3000/initiatePayment',
+            $.ajax({url: 'http://0.0.0.0:3000/initiatePayment',
                 headers: { 'Accept': 'application/json',
                             'Content-Type': 'application/json' 
                         },
@@ -151,7 +151,7 @@
                     //console.log("token",data.singleUseCustomerToken);
                     // make AJAX call to Payments API
                     $.ajax({
-                        url: 'http://localhost:3000',
+                        url: 'http://0.0.0.0:3000',
                         type: 'post',
                         data: JSON.stringify( data),
                         contentType: 'application/json',
